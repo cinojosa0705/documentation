@@ -1,55 +1,54 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Mint Starter Kit",
+  "name": "Satoshi Perps Protocol",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#FF9800",
+    "light": "#FFCA28",
+    "dark": "#F57C00"
   },
   "favicon": "/favicon.svg",
   "navigation": {
     "tabs": [
       {
-        "tab": "Guides",
+        "tab": "Core",
         "groups": [
           {
-            "group": "Get Started",
+            "group": "Core Contracts",
             "pages": [
-              "introduction",
-              "quickstart",
-              "development"
-            ]
-          },
-          {
-            "group": "Essentials",
-            "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/settings",
-              "essentials/navigation",
-              "essentials/reusable-snippets"
+              "contracts/vault",
+              "contracts/vault-utils",
+              "contracts/vault-price-feed",
+              "contracts/vault-error-controller",
+              "contracts/position-router",
+              "contracts/position-manager",
+              "contracts/position-utils",
+              "contracts/base-position-manager",
+              "contracts/order-book",
+              "contracts/router",
+              "contracts/shorts-tracker",
+              "contracts/slp-manager",
+              "contracts/slp-manager-router"
             ]
           }
         ]
       },
       {
-        "tab": "API Reference",
+        "tab": "Interfaces",
         "groups": [
           {
-            "group": "API Documentation",
+            "group": "Contract Interfaces",
             "pages": [
-              "api-reference/introduction"
-            ]
-          },
-          {
-            "group": "Endpoint Examples",
-            "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
+              "interfaces/interfaces/ivault",
+              "interfaces/interfaces/ivault-utils",
+              "interfaces/interfaces/ivault-price-feed",
+              "interfaces/interfaces/iposition-router",
+              "interfaces/interfaces/iposition-router-callback-receiver",
+              "interfaces/interfaces/ibase-position-manager",
+              "interfaces/interfaces/iorder-book",
+              "interfaces/interfaces/irouter",
+              "interfaces/interfaces/ishorts-tracker",
+              "interfaces/interfaces/islp-manager"
             ]
           }
         ]
@@ -58,45 +57,20 @@
     "global": {
       "anchors": [
         {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Community",
-          "href": "https://mintlify.com/community",
-          "icon": "slack"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
+          "anchor": "GitHub",
+          "href": "https://github.com/NLX-Protocol/satoshi-perps/tree/main/contracts/core",
+          "icon": "github"
         }
       ]
     }
   },
   "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
-  },
-  "navbar": {
-    "links": [
-      {
-        "label": "Support",
-        "href": "mailto:hi@mintlify.com"
-      }
-    ],
-    "primary": {
-      "type": "button",
-      "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
-    }
+    "light": "https://satoshiapp.xyz/satoshiLogo_footer.svg",
+    "dark": "https://satoshiapp.xyz/satoshiLogo_footer.svg"
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
+      "github": "https://github.com/NLX-Protocol/satoshi-perps/tree/main/contracts/core"
     }
   }
 }
