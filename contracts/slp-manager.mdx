@@ -27,12 +27,12 @@ SLP tokens represent a user's share of the protocol's liquidity pool and entitle
 function addLiquidity(
     address _token,
     uint256 _amount,
-    uint256 _minSlp,
-    uint256 _minToken
+    uint256 _minUsdg,
+    uint256 _minSlp
 ) external returns (uint256);
 ```
 
-Adds liquidity to the protocol and mints SLP tokens.
+Adds liquidity to the protocol and mints SLP tokens. Returns the amount of SLP tokens minted.
 
 ```solidity
 function removeLiquidity(
@@ -54,15 +54,15 @@ function getAum(bool _maximise) external view returns (uint256);
 Calculates the total Assets Under Management (AUM) of the protocol.
 
 ```solidity
-function getAumInToken(bool _maximise) external view returns (uint256);
+function getAumInUsdg(bool _maximise) external view returns (uint256);
 ```
 
-Calculates the AUM in terms of the pool token.
+Calculates the AUM in terms of USDG.
 
 ### Price Calculation
 
 ```solidity
-function getSlpPrice(bool _maximise) external view returns (uint256);
+function getPrice(bool _maximise) external view returns (uint256);
 ```
 
 Calculates the price of SLP tokens based on the AUM and total supply.
@@ -119,6 +119,35 @@ The SlpManager is tightly integrated with the Vault contract:
 2. Fees earned by the Vault are distributed to SLP token holders
 3. The SlpManager helps maintain the stability of the protocol by providing liquidation reserves
 
+## Handler System and Private Mode
+
+The SlpManager implements a handler system and private mode for controlled access:
+
+```solidity
+mapping (address => bool) public isHandler;
+bool public inPrivateMode;
+```
+
+- **Handlers**: Addresses authorized to perform certain functions
+- **Private Mode**: When enabled, only authorized addresses can add/remove liquidity
+
+These features are controlled via:
+```solidity
+function setHandler(address _handler, bool _isActive) external;
+function setInPrivateMode(bool _inPrivateMode) external;
+```
+
+## ShortsTracker Integration
+
+The SlpManager integrates with the ShortsTracker contract to account for global short positions when calculating AUM:
+
+```solidity
+address public shortsTracker;
+function setShortsTracker(address _shortsTracker) external;
+```
+
+This integration ensures accurate tracking of protocol assets and liabilities.
+
 ## Security Considerations
 
 The SlpManager implements several security features:
@@ -126,6 +155,8 @@ The SlpManager implements several security features:
 - **Minimum Output Amounts**: Protects users from slippage
 - **AUM Adjustments**: Allows fine-tuning of SLP pricing
 - **Access Controls**: Restricts sensitive functions to authorized addresses
+- **Private Mode**: Ability to restrict liquidity operations to trusted addresses
+- **Handler System**: Fine-grained permissions for different functions
 
 ## Example Usage
 
@@ -144,8 +175,8 @@ The SlpManager implements several security features:
     await slpManager.addLiquidity(
       wethAddress, // Token to provide
       liquidityAmount, // Amount to provide
-      ethers.utils.parseEther("9.5"), // Minimum SLP to receive (5% slippage)
-      0 // Minimum token (not relevant for deposits)
+      ethers.utils.parseEther("9.5"), // Minimum USDG to receive
+      ethers.utils.parseEther("9.5") // Minimum SLP to receive (5% slippage)
     );
     ```
   </Step>
@@ -154,7 +185,7 @@ The SlpManager implements several security features:
     
     ```javascript
     // Get SLP price
-    const slpPrice = await slpManager.getSlpPrice(true);
+    const slpPrice = await slpManager.getPrice(true);
     
     // Get user's SLP balance
     const slpBalance = await slpToken.balanceOf(userAddress);

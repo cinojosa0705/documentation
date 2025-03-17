@@ -80,16 +80,16 @@ Creates a request to decrease a position.
 ### Position Execution
 
 ```solidity
-function executeIncreasePosition(bytes32 _key, address _executionFeeReceiver) external;
+function executeIncreasePosition(bytes32 _key, address _executionFeeReceiver) external returns (bool);
 ```
 
-Executes a queued increase position request.
+Executes a queued increase position request. Returns a boolean indicating execution success.
 
 ```solidity
-function executeDecreasePosition(bytes32 _key, address _executionFeeReceiver) external;
+function executeDecreasePosition(bytes32 _key, address _executionFeeReceiver) external returns (bool);
 ```
 
-Executes a queued decrease position request.
+Executes a queued decrease position request. Returns a boolean indicating execution success.
 
 ### Batch Execution
 
@@ -126,10 +126,10 @@ Requests have a limited lifespan defined by the `maxTimeDelay` parameter. If not
 The PositionRouter implements a callback mechanism to notify external contracts when positions are executed:
 
 ```solidity
-function callbackFunction(bytes32 positionKey, bool isExecuted, bool isIncrease) external;
+function gmxPositionCallback(bytes32 positionKey, bool isExecuted, bool isIncrease) external;
 ```
 
-When a position is executed, if a callback target was specified in the request, this function is called on the target contract to notify it of the execution result.
+When a position is executed, if a callback target was specified in the request, this function is called on the target contract to notify it of the execution result. The callback target must implement the IPositionRouterCallbackReceiver interface.
 
 ## Execution Fee Mechanism
 
@@ -155,6 +155,52 @@ The PositionRouter interacts with the Vault contract to execute positions:
    - Calls Vault's decreasePosition function
    - Handles token transfers back to the user
 
+## Callback Gas Limits
+
+The PositionRouter implements configurable gas limits for position execution callbacks:
+
+```solidity
+uint256 public callbackGasLimit;
+mapping (address => uint256) public customCallbackGasLimits;
+```
+
+- `callbackGasLimit`: Default gas limit for all callbacks
+- `customCallbackGasLimits`: Custom gas limits for specific callback targets
+
+Admins can set these limits using:
+```solidity
+function setCallbackGasLimit(uint256 _callbackGasLimit) external;
+function setCustomCallbackGasLimit(address _target, uint256 _gasLimit) external;
+```
+
+## Position Cancellation
+
+Users can cancel their pending position requests if they haven't been executed within the allowed time window:
+
+```solidity
+function cancelIncreasePosition(bytes32 _key, address _executionFeeReceiver) external;
+function cancelDecreasePosition(bytes32 _key, address _executionFeeReceiver) external;
+```
+
+These functions validate that:
+- The request exists
+- The caller is the request creator
+- The request has not been executed
+- The execution timeframe has expired
+
+## Position Keepers
+
+The PositionRouter uses a keeper system to manage who can execute position requests:
+
+```solidity
+mapping (address => bool) public isPositionKeeper;
+```
+
+Only approved position keepers can execute position requests, controlled by:
+```solidity
+function setPositionKeeper(address _account, bool _isActive) external;
+```
+
 ## Security Considerations
 
 The PositionRouter implements several security features:
@@ -163,6 +209,7 @@ The PositionRouter implements several security features:
 - **Delay Parameters**: Configurable minimum and maximum delay between request and execution
 - **Access Control**: Role-based permissions for execution and configuration
 - **Circuit Breakers**: The contract can be paused in emergency situations
+- **Gas Limit Controls**: Prevents callback functions from using excessive gas
 
 ## Example Usage
 

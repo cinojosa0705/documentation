@@ -51,7 +51,7 @@ Calculates the global profit or loss for all short positions of a token.
 function globalShortSizes(address _token) external view returns (uint256);
 ```
 
-Returns the total size of all short positions for a token. This accesses the stored value from the state mapping.
+Returns the total size of all short positions for a token. This function accesses data stored in the Vault contract rather than maintaining a separate copy.
 
 ```solidity
 function globalShortAveragePrices(address _token) external view returns (uint256);
@@ -75,9 +75,9 @@ Sets or removes a handler that can update global short data.
 
 ## Global Short Tracking Mechanism
 
-The ShortsTracker maintains two key pieces of data for each token:
-1. **Global Short Size**: The total USD value of all short positions
-2. **Global Short Average Price**: The average entry price of all short positions
+The ShortsTracker integrates with the Vault to access and track two key pieces of data for each token:
+1. **Global Short Size**: The total USD value of all short positions (stored in the Vault)
+2. **Global Short Average Price**: The average entry price of all short positions (stored in the Vault)
 
 When a short position is increased or decreased, the contract updates these values with the following logic:
 

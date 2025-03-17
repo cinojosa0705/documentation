@@ -107,6 +107,12 @@ function sellUSDG(address _token, address _receiver) external returns (uint256);
 
 Sells USDG tokens for the specified token.
 
+```solidity
+function swap(address _tokenIn, address _tokenOut, address _receiver) external returns (uint256);
+```
+
+This function is implemented but is currently disabled. Direct token swapping is not available, but users can still swap tokens indirectly by using `buyUSDG` and `sellUSDG` functions in sequence.
+
 ### Token Configuration
 
 ```solidity
