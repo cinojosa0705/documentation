@@ -250,6 +250,92 @@ The Vault implements several security features:
 All sensitive functions are protected by the `nonReentrant` modifier to prevent reentrancy attacks.
 </Note>
 
+## Position Flow Charts
+
+### Opening a Position
+
+The following flow chart illustrates the complete process of opening a position through the protocol:
+
+```mermaid
+flowchart TD
+    A[User] -->|1. Call createIncreasePosition| B[PositionRouter]
+    B -->|2. Store request data| C[Request Queue]
+    B -->|3. Transfer tokens from user| D[Token Transfer]
+    E[Keeper] -->|4. Call executeIncreasePosition| B
+    B -->|5. Validate request parameters| F{Valid?}
+    F -->|No| G[Refund tokens to user]
+    F -->|Yes| H[Call Vault.increasePosition]
+    H --> I[Vault]
+    I -->|6. Check price from| J[VaultPriceFeed]
+    J -->|7. Return price| I
+    I -->|8. Verify collateral| K{Sufficient?}
+    K -->|No| L[Revert transaction]
+    K -->|Yes| M[Calculate fees]
+    M --> N[Update position data]
+    N --> O[Reserve tokens]
+    O --> P[Update global open interest]
+    P --> Q[Emit IncreasePosition event]
+    Q -->|9. Return to PositionRouter| B
+    B -->|10. Optional: Call| R[Callback]
+    R --> S[User's callback contract]
+    B -->|11. Send execution fee| E
+```
+
+### Closing a Position
+
+This flow chart shows the process of closing or decreasing a position:
+
+```mermaid
+flowchart TD
+    A[User] -->|1. Call createDecreasePosition| B[PositionRouter]
+    B -->|2. Store request data| C[Request Queue]
+    E[Keeper] -->|3. Call executeDecreasePosition| B
+    B -->|4. Validate request parameters| F{Valid?}
+    F -->|No| G[Refund execution fee to user]
+    F -->|Yes| H[Call Vault.decreasePosition]
+    H --> I[Vault]
+    I -->|5. Check price from| J[VaultPriceFeed]
+    J -->|6. Return price| I
+    I -->|7. Calculate PnL| K[Calculate profit/loss]
+    K --> L{Is profitable?}
+    L -->|Yes| M[Apply min profit time rule]
+    L -->|No| N[Process loss]
+    M --> O[Deduct fees]
+    N --> O
+    O --> P[Update position data]
+    P --> Q[Release reserved tokens]
+    Q --> R[Update global open interest]
+    R --> S[Transfer tokens to receiver]
+    S --> T[Emit DecreasePosition event]
+    T -->|8. Return to PositionRouter| B
+    B -->|9. Optional: Call| U[Callback]
+    U --> V[User's callback contract]
+    B -->|10. Send execution fee| E
+```
+
+### Liquidation Process
+
+This flow chart illustrates the liquidation process for underwater positions:
+
+```mermaid
+flowchart TD
+    A[Liquidator] -->|1. Call liquidatePosition| B[Vault]
+    B -->|2. Check if position exists| C{Position exists?}
+    C -->|No| D[Revert transaction]
+    C -->|Yes| E[Get position data]
+    E --> F[Check price from VaultPriceFeed]
+    F --> G{Is position liquidatable?}
+    G -->|No| H[Revert: position not liquidatable]
+    G -->|Yes| I[Calculate remaining collateral]
+    I --> J[Calculate liquidation fee]
+    J --> K[Update position data]
+    K --> L[Release reserved tokens]
+    L --> M[Update global open interest]
+    M --> N[Pay liquidation fee to liquidator]
+    N --> O[Transfer remaining collateral to fee receiver]
+    O --> P[Emit LiquidatePosition event]
+```
+
 ## Example: Position Lifecycle
 
 <Steps>
